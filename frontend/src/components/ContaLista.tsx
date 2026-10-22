@@ -1,12 +1,15 @@
 import type { ContaResponse } from '../api/types'
 import { formatarMoeda } from '../lib/formatters'
 
+// Propriedades da lista de contas.
 interface ContaListaProps {
   contas: ContaResponse[]
   onSelecionar: (conta: ContaResponse) => void
 }
 
+// Mostra a lista de contas cadastradas.
 export function ContaLista({ contas, onSelecionar }: ContaListaProps) {
+  // Aviso quando não há contas.
   if (contas.length === 0) {
     return <p className="vazio">Nenhuma conta cadastrada ainda.</p>
   }
@@ -15,6 +18,7 @@ export function ContaLista({ contas, onSelecionar }: ContaListaProps) {
     <ul className="lista-contas">
       {contas.map((conta) => (
         <li key={conta.id}>
+          {/* Cada conta é um botão que abre o detalhe. */}
           <button
             type="button"
             className="conta-item"

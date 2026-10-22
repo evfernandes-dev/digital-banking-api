@@ -1,3 +1,4 @@
+/* Variáveis de cores e configuração do tema. */
 :root {
   --azul-escuro: #142a4a;
   --azul: #1e3a5f;
@@ -15,16 +16,19 @@
   color-scheme: light;
 }
 
+/* Inclui bordas e padding no tamanho dos elementos. */
 * {
   box-sizing: border-box;
 }
 
+/* Altura mínima da página. */
 html,
 body,
 #root {
   min-height: 100%;
 }
 
+/* Estilo geral do corpo. */
 body {
   margin: 0;
   background-color: var(--cinza-claro);
@@ -33,6 +37,7 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Estrutura vertical da aplicação. */
 .app {
   min-height: 100vh;
   display: flex;
@@ -40,6 +45,7 @@ body {
 }
 
 /* --- Cabeçalho --- */
+/* Faixa superior com título e subtítulo. */
 .topo {
   background-color: var(--azul-escuro);
   color: var(--branco);
@@ -47,6 +53,7 @@ body {
   text-align: center;
 }
 
+/* Título principal. */
 .topo__titulo {
   margin: 0;
   font-size: 1.6rem;
@@ -54,6 +61,7 @@ body {
   letter-spacing: 0.02em;
 }
 
+/* Texto abaixo do título. */
 .topo__subtitulo {
   margin: 6px 0 0;
   font-size: 0.9rem;
@@ -61,6 +69,7 @@ body {
 }
 
 /* --- Layout --- */
+/* Área central com largura máxima. */
 .conteudo {
   flex: 1;
   width: 100%;
@@ -69,6 +78,7 @@ body {
   padding: 32px 16px 48px;
 }
 
+/* Cartão branco usado nas telas. */
 .cartao {
   background-color: var(--branco);
   border: 1px solid var(--cinza);
@@ -76,6 +86,7 @@ body {
   padding: 24px;
 }
 
+/* Cabeçalho do cartão com título e ação. */
 .cartao__cabecalho {
   display: flex;
   align-items: center;
@@ -84,12 +95,14 @@ body {
   margin-bottom: 16px;
 }
 
+/* Título dentro do cabeçalho. */
 .cartao__cabecalho h2 {
   margin: 0;
   font-size: 1.15rem;
 }
 
 /* --- Lista de contas --- */
+/* Lista vertical de contas. */
 .lista-contas {
   list-style: none;
   margin: 0;
@@ -99,6 +112,7 @@ body {
   gap: 10px;
 }
 
+/* Item clicável de cada conta. */
 .conta-item {
   width: 100%;
   display: grid;
@@ -118,22 +132,26 @@ body {
   transition: border-color 0.15s ease, background-color 0.15s ease;
 }
 
+/* Destaque ao passar o mouse. */
 .conta-item:hover {
   background-color: var(--branco);
   border-color: var(--azul-claro);
 }
 
+/* Nome do titular no item. */
 .conta-item__titular {
   grid-area: titular;
   font-weight: 600;
 }
 
+/* Número da conta no item. */
 .conta-item__numero {
   grid-area: numero;
   font-size: 0.85rem;
   color: var(--cinza-texto);
 }
 
+/* Saldo no item. */
 .conta-item__saldo {
   grid-area: saldo;
   align-self: center;
@@ -142,16 +160,19 @@ body {
 }
 
 /* --- Detalhe da conta --- */
+/* Nome do titular no detalhe. */
 .conta-titular {
   margin: 16px 0 4px;
   font-size: 1.3rem;
 }
 
+/* Número da conta no detalhe. */
 .conta-numero {
   margin: 0;
   color: var(--cinza-texto);
 }
 
+/* Bloco de destaque do saldo. */
 .saldo {
   margin: 20px 0;
   padding: 18px;
@@ -163,6 +184,7 @@ body {
   gap: 6px;
 }
 
+/* Rótulo do saldo. */
 .saldo__rotulo {
   font-size: 0.8rem;
   color: #c6d3e3;
@@ -170,12 +192,14 @@ body {
   letter-spacing: 0.06em;
 }
 
+/* Valor do saldo. */
 .saldo__valor {
   font-size: 1.8rem;
   font-weight: 700;
 }
 
 /* --- Botões --- */
+/* Estilo base dos botões. */
 .btn {
   font: inherit;
   padding: 10px 18px;
@@ -185,30 +209,36 @@ body {
   transition: background-color 0.15s ease, border-color 0.15s ease;
 }
 
+/* Aparência de botão desabilitado. */
 .btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
 
+/* Botão principal. */
 .btn--primario {
   background-color: var(--azul);
   color: var(--branco);
 }
 
+/* Hover do botão principal. */
 .btn--primario:hover:not(:disabled) {
   background-color: var(--azul-escuro);
 }
 
+/* Botão secundário. */
 .btn--secundario {
   background-color: var(--branco);
   color: var(--azul);
   border-color: var(--azul);
 }
 
+/* Hover do botão secundário. */
 .btn--secundario:hover:not(:disabled) {
   background-color: var(--cinza-claro);
 }
 
+/* Botão sem fundo, usado no "Voltar". */
 .btn--texto {
   background: none;
   border: none;
@@ -217,10 +247,12 @@ body {
   font-weight: 600;
 }
 
+/* Hover do botão de texto. */
 .btn--texto:hover {
   color: var(--azul-escuro);
 }
 
+/* Agrupa botões lado a lado. */
 .acoes {
   display: flex;
   gap: 10px;
@@ -228,6 +260,7 @@ body {
 }
 
 /* --- Formulários --- */
+/* Formulário em coluna. */
 .formulario {
   display: flex;
   flex-direction: column;
@@ -235,6 +268,7 @@ body {
   margin-bottom: 8px;
 }
 
+/* Rótulo e campo em coluna. */
 .campo {
   display: flex;
   flex-direction: column;
@@ -243,6 +277,7 @@ body {
   color: var(--cinza-texto);
 }
 
+/* Campo de texto padrão. */
 .input {
   padding: 10px 12px;
   border: 1px solid var(--cinza);
@@ -252,6 +287,7 @@ body {
   background-color: var(--branco);
 }
 
+/* Destaque do campo em foco. */
 .input:focus {
   outline: 2px solid var(--azul-claro);
   outline-offset: 1px;
@@ -259,6 +295,7 @@ body {
 }
 
 /* --- Mensagens --- */
+/* Estilo base das mensagens. */
 .mensagem {
   margin: 0 0 12px;
   padding: 10px 14px;
@@ -266,16 +303,19 @@ body {
   font-size: 0.9rem;
 }
 
+/* Mensagem de erro. */
 .mensagem--erro {
   background-color: var(--erro-fundo);
   color: var(--erro);
 }
 
+/* Mensagem de sucesso. */
 .mensagem--sucesso {
   background-color: var(--sucesso-fundo);
   color: var(--sucesso);
 }
 
+/* Texto de lista vazia ou carregando. */
 .vazio {
   color: var(--cinza-texto);
   text-align: center;
@@ -283,6 +323,7 @@ body {
 }
 
 /* --- Responsividade --- */
+/* Ajustes para telas pequenas. */
 @media (max-width: 480px) {
   .cartao__cabecalho {
     flex-direction: column;

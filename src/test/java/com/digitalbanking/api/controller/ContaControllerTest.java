@@ -25,15 +25,19 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+// Testes da camada HTTP do ContaController.
 @WebMvcTest(ContaController.class)
 class ContaControllerTest {
 
+    // Cliente para simular requisições HTTP.
     @Autowired
     private MockMvc mockMvc;
 
+    // Service simulado para focar no controller.
     @MockitoBean
     private ContaService contaService;
 
+    // POST /contas deve devolver 201 com Location.
     @Test
     void deveCriarContaERetornar201ComLocation() throws Exception {
         when(contaService.criar(any()))
@@ -52,6 +56,7 @@ class ContaControllerTest {
                 .andExpect(jsonPath("$.saldo").value(0.00));
     }
 
+    // Titular vazio deve devolver 400.
     @Test
     void deveRetornar400QuandoTitularNaoForInformado() throws Exception {
         mockMvc.perform(post("/contas")
@@ -65,6 +70,7 @@ class ContaControllerTest {
         verifyNoInteractions(contaService);
     }
 
+    // GET /contas deve listar as contas.
     @Test
     void deveListarContas() throws Exception {
         when(contaService.listar()).thenReturn(List.of(
@@ -78,6 +84,7 @@ class ContaControllerTest {
                 .andExpect(jsonPath("$[1].titular").value("Bruno Souza"));
     }
 
+    // GET /contas/{id} deve devolver a conta.
     @Test
     void deveBuscarContaPorIdRetornando200() throws Exception {
         when(contaService.buscarPorId(1L))
@@ -90,6 +97,7 @@ class ContaControllerTest {
                 .andExpect(jsonPath("$.saldo").value(100.00));
     }
 
+    // Conta inexistente deve devolver 404.
     @Test
     void deveRetornar404QuandoContaNaoExistir() throws Exception {
         when(contaService.buscarPorId(99L))
@@ -100,6 +108,7 @@ class ContaControllerTest {
                 .andExpect(jsonPath("$.status").value(404));
     }
 
+    // GET /contas/{id}/saldo deve devolver o saldo.
     @Test
     void deveConsultarSaldo() throws Exception {
         when(contaService.consultarSaldo(1L))
@@ -112,6 +121,7 @@ class ContaControllerTest {
                 .andExpect(jsonPath("$.saldo").value(100.00));
     }
 
+    // Depósito válido deve devolver 200 com o novo saldo.
     @Test
     void deveDepositarRetornando200() throws Exception {
         when(contaService.depositar(eq(1L), any(BigDecimal.class)))
@@ -126,6 +136,7 @@ class ContaControllerTest {
                 .andExpect(jsonPath("$.saldo").value(150.00));
     }
 
+    // Depósito com valor zero deve devolver 400.
     @Test
     void deveRetornar400AoDepositarValorNaoPositivo() throws Exception {
         mockMvc.perform(post("/contas/1/deposito")
@@ -139,6 +150,7 @@ class ContaControllerTest {
         verifyNoInteractions(contaService);
     }
 
+    // Saque sem saldo deve devolver 409.
     @Test
     void deveRetornar409AoSacarComSaldoInsuficiente() throws Exception {
         when(contaService.sacar(eq(1L), any(BigDecimal.class)))

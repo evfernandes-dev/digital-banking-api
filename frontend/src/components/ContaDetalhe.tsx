@@ -5,21 +5,30 @@ import type { ContaResponse } from '../api/types'
 import { formatarMoeda } from '../lib/formatters'
 import { Mensagem } from './Mensagem'
 
+// Tipos de operação disponíveis na conta.
 type TipoOperacao = 'deposito' | 'saque'
 
+// Propriedades recebidas do componente pai.
 interface ContaDetalheProps {
   conta: ContaResponse
   onVoltar: () => void
   onAtualizada: (conta: ContaResponse) => void
 }
 
+// Tela com o detalhe da conta e as operações.
 export function ContaDetalhe({ conta, onVoltar, onAtualizada }: ContaDetalheProps) {
+  // Operação aberta no momento.
   const [operacao, setOperacao] = useState<TipoOperacao | null>(null)
+  // Valor digitado pelo usuário.
   const [valor, setValor] = useState('')
+  // Indica envio em andamento.
   const [enviando, setEnviando] = useState(false)
+  // Mensagem de sucesso.
   const [mensagem, setMensagem] = useState<string | null>(null)
+  // Mensagem de erro.
   const [erro, setErro] = useState<string | null>(null)
 
+  // Abre o formulário da operação escolhida.
   function abrirOperacao(tipo: TipoOperacao) {
     setOperacao(tipo)
     setValor('')
@@ -27,6 +36,7 @@ export function ContaDetalhe({ conta, onVoltar, onAtualizada }: ContaDetalheProp
     setErro(null)
   }
 
+  // Valida o valor e envia a operação.
   async function enviar(evento: FormEvent) {
     evento.preventDefault()
     if (!operacao) {
@@ -36,6 +46,7 @@ export function ContaDetalhe({ conta, onVoltar, onAtualizada }: ContaDetalheProp
     setErro(null)
     setMensagem(null)
 
+    // Converte o texto digitado em número.
     const numero = Number(valor)
     if (!Number.isFinite(numero) || numero <= 0) {
       setErro('Informe um valor maior que zero.')
@@ -44,11 +55,13 @@ export function ContaDetalhe({ conta, onVoltar, onAtualizada }: ContaDetalheProp
 
     setEnviando(true)
     try {
+      // Chama depósito ou saque conforme a operação.
       const atualizada =
         operacao === 'deposito'
           ? await contasApi.depositar(conta.id, numero)
           : await contasApi.sacar(conta.id, numero)
 
+      // Atualiza a tela com o novo saldo.
       onAtualizada(atualizada)
       setMensagem(operacao === 'deposito' ? 'Depósito realizado com sucesso.' : 'Saque realizado com sucesso.')
       setOperacao(null)
@@ -62,22 +75,27 @@ export function ContaDetalhe({ conta, onVoltar, onAtualizada }: ContaDetalheProp
 
   return (
     <section className="cartao">
+      {/* Volta para a listagem. */}
       <button type="button" className="btn btn--texto" onClick={onVoltar}>
         ← Voltar
       </button>
 
+      {/* Dados do titular e da conta. */}
       <h2 className="conta-titular">{conta.titular}</h2>
       <p className="conta-numero">Conta {conta.numero}</p>
 
+      {/* Saldo disponível. */}
       <div className="saldo">
         <span className="saldo__rotulo">Saldo disponível</span>
         <span className="saldo__valor">{formatarMoeda(conta.saldo)}</span>
       </div>
 
+      {/* Mensagens de retorno. */}
       {mensagem && <Mensagem tipo="sucesso" texto={mensagem} />}
       {erro && <Mensagem tipo="erro" texto={erro} />}
 
       {operacao === null ? (
+        // Botões para escolher a operação.
         <div className="acoes">
           <button type="button" className="btn btn--primario" onClick={() => abrirOperacao('deposito')}>
             Depositar
@@ -87,6 +105,7 @@ export function ContaDetalhe({ conta, onVoltar, onAtualizada }: ContaDetalheProp
           </button>
         </div>
       ) : (
+        // Formulário de depósito ou saque.
         <form className="formulario" onSubmit={enviar}>
           <label className="campo">
             <span>Valor do {operacao === 'deposito' ? 'depósito' : 'saque'}</span>

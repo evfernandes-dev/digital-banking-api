@@ -17,19 +17,24 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+// Controller REST dos endpoints de contas.
 @RestController
 @RequestMapping("/contas")
 public class ContaController {
 
+    // Service com as regras de negócio.
     private final ContaService contaService;
 
+    // Recebe o service pelo construtor.
     public ContaController(ContaService contaService) {
         this.contaService = contaService;
     }
 
+    // Cria uma conta e responde 201 Created.
     @PostMapping
     public ResponseEntity<ContaResponse> criar(@Valid @RequestBody ContaRequest request) {
         ContaResponse response = contaService.criar(request);
+        // Monta a URL da conta criada para o header Location.
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}")
                 .buildAndExpand(response.id())
@@ -37,26 +42,31 @@ public class ContaController {
         return ResponseEntity.created(location).body(response);
     }
 
+    // Lista todas as contas cadastradas.
     @GetMapping
     public ResponseEntity<List<ContaResponse>> listar() {
         return ResponseEntity.ok(contaService.listar());
     }
 
+    // Busca uma conta pelo id.
     @GetMapping("/{id}")
     public ResponseEntity<ContaResponse> buscarPorId(@PathVariable Long id) {
         return ResponseEntity.ok(contaService.buscarPorId(id));
     }
 
+    // Consulta somente o saldo da conta.
     @GetMapping("/{id}/saldo")
     public ResponseEntity<SaldoResponse> consultarSaldo(@PathVariable Long id) {
         return ResponseEntity.ok(contaService.consultarSaldo(id));
     }
 
+    // Deposita um valor na conta.
     @PostMapping("/{id}/deposito")
     public ResponseEntity<ContaResponse> depositar(@PathVariable Long id, @Valid @RequestBody ValorRequest request) {
         return ResponseEntity.ok(contaService.depositar(id, request.valor()));
     }
 
+    // Saca um valor da conta.
     @PostMapping("/{id}/saque")
     public ResponseEntity<ContaResponse> sacar(@PathVariable Long id, @Valid @RequestBody ValorRequest request) {
         return ResponseEntity.ok(contaService.sacar(id, request.valor()));
