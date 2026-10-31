@@ -3,8 +3,6 @@
 -- Banco: digital_banking (MySQL 8)
 --
 -- Use este script quando o banco ainda NAO existe ou esta vazio.
--- Se voce ja possui as tabelas antigas (clientes/contas/transacoes) com dados,
--- use db/migracao-v1-para-v2.sql para preservar os dados.
 --
 -- Valor monetario sempre em DECIMAL(19,2).
 -- =============================================================================
