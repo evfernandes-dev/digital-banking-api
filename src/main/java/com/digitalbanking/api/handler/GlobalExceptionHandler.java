@@ -11,6 +11,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 // Trata exceções de todos os controllers.
 @RestControllerAdvice
@@ -39,6 +40,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ApiErrorResponse> tratarCorpoInvalido(HttpMessageNotReadableException ex) {
         return construir(HttpStatus.BAD_REQUEST, "Corpo da requisição ausente ou inválido.", List.of());
+    }
+
+    // Trata id com tipo inválido (ex.: /contas/abc).
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ApiErrorResponse> tratarParametroInvalido(MethodArgumentTypeMismatchException ex) {
+        return construir(HttpStatus.BAD_REQUEST, "Parâmetro inválido: " + ex.getName() + ".", List.of());
     }
 
     // Último recurso: registra e devolve 500.
