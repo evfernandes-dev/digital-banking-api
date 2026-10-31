@@ -170,8 +170,9 @@ Errors are handled centrally by `GlobalExceptionHandler` and returned in a consi
 
 | Status | When it happens |
 |--------|-----------------|
-| `400 Bad Request` | Invalid or missing input (validation), invalid amount, or an unreadable/invalid request body |
-| `404 Not Found` | The account id does not exist |
+| `400 Bad Request` | Invalid or missing input (validation), invalid amount, a path parameter with an invalid type, or an unreadable/invalid request body |
+| `404 Not Found` | The account id does not exist, or the route does not exist |
+| `405 Method Not Allowed` | The HTTP method is not supported by the route |
 | `409 Conflict` | Withdrawal above the available balance, or it was not possible to generate a unique account number |
 | `500 Internal Server Error` | Any unexpected error (logged on the server) |
 
