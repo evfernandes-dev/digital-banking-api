@@ -12,6 +12,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 // Trata exceções de todos os controllers.
 @RestControllerAdvice
@@ -46,6 +47,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ApiErrorResponse> tratarParametroInvalido(MethodArgumentTypeMismatchException ex) {
         return construir(HttpStatus.BAD_REQUEST, "Parâmetro inválido: " + ex.getName() + ".", List.of());
+    }
+
+    // Trata rota que não corresponde a nenhum controller.
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ApiErrorResponse> tratarRotaNaoEncontrada(NoResourceFoundException ex) {
+        return construir(HttpStatus.NOT_FOUND, "Recurso não encontrado.", List.of());
     }
 
     // Último recurso: registra e devolve 500.
