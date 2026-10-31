@@ -150,6 +150,26 @@ class ContaControllerTest {
         verifyNoInteractions(contaService);
     }
 
+    // Id não numérico deve devolver 400.
+    @Test
+    void deveRetornar400QuandoIdNaoForNumerico() throws Exception {
+        mockMvc.perform(get("/contas/abc"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.message").value("Parâmetro inválido: id."));
+
+        verifyNoInteractions(contaService);
+    }
+
+    // Rota inexistente deve devolver 404.
+    @Test
+    void deveRetornar404ParaRotaInexistente() throws Exception {
+        mockMvc.perform(get("/nao-existe"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.message").value("Recurso não encontrado."));
+    }
+
     // Saque sem saldo deve devolver 409.
     @Test
     void deveRetornar409AoSacarComSaldoInsuficiente() throws Exception {
