@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -53,6 +54,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NoResourceFoundException.class)
     public ResponseEntity<ApiErrorResponse> tratarRotaNaoEncontrada(NoResourceFoundException ex) {
         return construir(HttpStatus.NOT_FOUND, "Recurso não encontrado.", List.of());
+    }
+
+    // Trata método HTTP sem mapeamento (ex.: PUT /contas).
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ApiErrorResponse> tratarMetodoNaoSuportado(HttpRequestMethodNotSupportedException ex) {
+        return construir(HttpStatus.METHOD_NOT_ALLOWED, "Método HTTP não permitido para este recurso.", List.of());
     }
 
     // Último recurso: registra e devolve 500.
