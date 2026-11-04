@@ -98,6 +98,24 @@ Content-Type: application/json
 }
 ```
 
+Deposit and withdraw:
+
+```http
+POST /contas/1/deposito
+Content-Type: application/json
+
+{ "valor": 150.00 }
+```
+
+```http
+POST /contas/1/saque
+Content-Type: application/json
+
+{ "valor": 50.00 }
+```
+
+Both operations return the updated account with `200 OK`. The React front end is optional; the API can also be tested with curl, Postman or Insomnia.
+
 ### Validation and errors
 
 - `ContaRequest`: `@NotBlank` and `@Size(max = 120)` for the account holder.
@@ -150,8 +168,8 @@ Backend tests:
 .\mvnw.cmd test
 ```
 
-- `ContaServiceTest`: account creation, unique number generation, listing, lookup, balance, deposit, withdrawal, insufficient balance and invalid amounts.
-- `ContaControllerTest`: HTTP status codes, `Location` header, validation errors, 404, 405 and business error responses.
+- `ContaServiceTest` (11 tests): account creation, unique number generation, listing, lookup, balance, deposit, withdrawal, insufficient balance and invalid amounts.
+- `ContaControllerTest` (12 tests): HTTP status codes, `Location` header, validation errors, 404, 405 and business error responses.
 
 Frontend tests:
 
@@ -160,7 +178,7 @@ cd frontend
 npm test
 ```
 
-The frontend suite currently covers the formatting helpers.
+The frontend suite has 3 tests for the formatting helpers.
 
 ---
 
