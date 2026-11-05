@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Digital Banking</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="cabecalho">
+      <h1>Digital Banking</h1>
+      <p>Contas, depósitos e saques</p>
+    </header>
+
+    <main class="conteudo">
+      <p id="mensagem" class="mensagem escondido"></p>
+
+      <section class="cartao">
+        <h2>Nova conta</h2>
+        <form id="form-conta" class="formulario">
+          <label for="titular">Nome do titular</label>
+          <div class="linha">
+            <input
+              id="titular"
+              type="text"
+              maxlength="120"
+              placeholder="Ex.: Ana Silva"
+              required
+            />
+            <button type="submit" class="botao">Criar conta</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="cartao">
+        <h2>Contas cadastradas</h2>
+        <p id="aviso" class="aviso">Carregando...</p>
+
+        <table id="tabela-contas" class="tabela escondido">
+          <thead>
+            <tr>
+              <th>Titular</th>
+              <th>Conta</th>
+              <th>Saldo</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="corpo-contas"></tbody>
+        </table>
+      </section>
+
+      <section id="detalhe" class="cartao escondido">
+        <button type="button" id="btn-voltar" class="botao botao--texto">← Voltar</button>
+        <h2 id="detalhe-titular"></h2>
+        <p id="detalhe-numero" class="aviso"></p>
+        <p class="saldo">Saldo: <strong id="detalhe-saldo"></strong></p>
+
+        <div class="operacoes">
+          <form id="form-deposito" class="formulario">
+            <label for="valor-deposito">Valor do depósito</label>
+            <div class="linha">
+              <input
+                id="valor-deposito"
+                type="number"
+                min="0.01"
+                step="0.01"
+                placeholder="0,00"
+                required
+              />
+              <button type="submit" class="botao">Depositar</button>
+            </div>
+          </form>
+
+          <form id="form-saque" class="formulario">
+            <label for="valor-saque">Valor do saque</label>
+            <div class="linha">
+              <input
+                id="valor-saque"
+                type="number"
+                min="0.01"
+                step="0.01"
+                placeholder="0,00"
+                required
+              />
+              <button type="submit" class="botao botao--secundario">Sacar</button>
+            </div>
+          </form>
+        </div>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>

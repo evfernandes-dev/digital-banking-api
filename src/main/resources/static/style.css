@@ -1,0 +1,162 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background: #f4f6f8;
+  color: #222;
+}
+
+.cabecalho {
+  background: #1e4d8c;
+  color: #fff;
+  padding: 24px 16px;
+  text-align: center;
+}
+
+.cabecalho h1 {
+  margin: 0 0 8px;
+  font-size: 28px;
+}
+
+.cabecalho p {
+  margin: 0;
+}
+
+.conteudo {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+}
+
+.cartao {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.cartao h2 {
+  margin-top: 0;
+  font-size: 20px;
+}
+
+.formulario {
+  margin-bottom: 16px;
+}
+
+.formulario label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: bold;
+}
+
+.linha {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+input {
+  flex: 1;
+  min-width: 180px;
+  padding: 10px;
+  border: 1px solid #bbb;
+  border-radius: 6px;
+  font-size: 15px;
+}
+
+.botao {
+  padding: 10px 16px;
+  border: 0;
+  border-radius: 6px;
+  background: #1e4d8c;
+  color: #fff;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.botao:hover {
+  background: #163a6b;
+}
+
+.botao--secundario {
+  background: #666;
+}
+
+.botao--secundario:hover {
+  background: #4d4d4d;
+}
+
+.botao--texto {
+  background: transparent;
+  color: #1e4d8c;
+  padding: 0;
+  margin-bottom: 16px;
+}
+
+.tabela {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tabela th,
+.tabela td {
+  text-align: left;
+  padding: 10px 8px;
+  border-bottom: 1px solid #eee;
+}
+
+.tabela th {
+  background: #f0f3f7;
+}
+
+.tabela button {
+  padding: 6px 12px;
+}
+
+.saldo {
+  font-size: 20px;
+}
+
+.saldo strong {
+  color: #1e4d8c;
+}
+
+.aviso {
+  color: #666;
+}
+
+.mensagem {
+  padding: 12px;
+  border-radius: 6px;
+  margin-bottom: 16px;
+}
+
+.mensagem--erro {
+  background: #fdecea;
+  color: #a1231b;
+}
+
+.mensagem--sucesso {
+  background: #e8f5e9;
+  color: #1e6b2e;
+}
+
+.escondido {
+  display: none;
+}
+
+.operacoes {
+  display: grid;
+  gap: 16px;
+}
+
+@media (min-width: 600px) {
+  .operacoes {
+    grid-template-columns: 1fr 1fr;
+  }
+}
