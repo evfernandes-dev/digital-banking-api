@@ -1,52 +1,69 @@
 # Digital Banking API
 
-Small REST API to create bank accounts, check balances, deposit and withdraw. Study/portfolio project built with Java 25, Spring Boot 4, MySQL and a React front end.
+API REST simples para estudo, com interface web básica em HTML, CSS e JavaScript puro.
 
-> The project has no authentication, pagination or deployment automation yet.
+Permite criar contas, listar contas, consultar uma conta, depositar e sacar.
 
-## Features
+## Funcionalidades
 
-- Create an account with a unique 8-digit number
-- List accounts and fetch one by ID
-- Check the balance
-- Deposit and withdraw with amount validation and no negative balance
-- Consistent JSON error responses
-- Small React front end for manual testing
+- Criar conta com número aleatório de 8 dígitos
+- Listar contas cadastradas
+- Consultar uma conta pelo id
+- Depositar e sacar com validação
+- Interface web servida pelo próprio Spring Boot
 
-## Stack
+## Tecnologias
 
-- **Backend:** Java 25, Spring Boot 4 (Web MVC, Data JPA, Validation), Maven
-- **Database:** MySQL 8
-- **Frontend:** React 19, TypeScript, Vite
-- **Tests:** JUnit 5, Mockito, MockMvc, Vitest
+- Java 25
+- Spring Boot 4 (Web MVC, Data JPA e Validation)
+- MySQL 8
+- HTML, CSS e JavaScript puro
+- JUnit 5, Mockito e MockMvc
 
-## Architecture
+## Como rodar
 
-Controller → Service → Repository, with DTOs and a global exception handler. Balance changes use a repository query with a row lock.
+Pré-requisitos: JDK 25 e MySQL 8.
 
-```text
-src/main/java/com/digitalbanking/api/
-├── controller/   REST endpoints
-├── dto/          Request and response records
-├── entity/       JPA entity
-├── exception/    Business exceptions
-├── handler/      Global exception handler
-├── repository/   Spring Data JPA repository
-└── service/      Business rules
-```
+1. Crie o banco:
 
-## API
+   ```powershell
+   Get-Content src\main\resources\db\schema.sql | mysql -u root -p
+   ```
 
-Base URL: `http://localhost:8081`
+   Se o comando `mysql` não estiver no PATH, abra o MySQL Workbench e execute o arquivo `src/main/resources/db/schema.sql`.
 
-| Method | Path | Description |
+2. Configure o usuário e a senha do banco (opcional; o padrão é `root` sem senha):
+
+   ```powershell
+   $env:DB_USERNAME = "root"
+   $env:DB_PASSWORD = "sua_senha"
+   ```
+
+3. Rode a aplicação:
+
+   ```powershell
+   .\mvnw.cmd spring-boot:run
+   ```
+
+4. Abra a interface em [http://localhost:8081](http://localhost:8081).
+
+A interface e a API rodam juntas no mesmo endereço.
+
+## Endpoints
+
+Base: `http://localhost:8081`
+
+| Método | Caminho | Descrição |
 | --- | --- | --- |
-| POST | `/contas` | Create an account |
-| GET | `/contas` | List accounts |
-| GET | `/contas/{id}` | Get an account |
-| GET | `/contas/{id}/saldo` | Get the balance |
-| POST | `/contas/{id}/deposito` | Deposit |
-| POST | `/contas/{id}/saque` | Withdraw |
+| POST | `/contas` | Cria uma conta |
+| GET | `/contas` | Lista todas as contas |
+| GET | `/contas/{id}` | Busca uma conta pelo id |
+| POST | `/contas/{id}/deposito` | Deposita um valor |
+| POST | `/contas/{id}/saque` | Saca um valor |
+
+### Exemplos
+
+Criar uma conta:
 
 ```http
 POST /contas
@@ -54,6 +71,8 @@ Content-Type: application/json
 
 { "titular": "Ana Silva" }
 ```
+
+Resposta:
 
 ```json
 {
@@ -64,68 +83,70 @@ Content-Type: application/json
 }
 ```
 
-Deposits and withdrawals accept `{ "valor": 150.00 }` and return the updated account with `200 OK`.
+Depositar ou sacar:
 
-## Business rules
+```http
+POST /contas/1/deposito
+Content-Type: application/json
 
-- Account numbers have 8 digits and are generated with retry on collision.
-- Deposits and withdrawals require a positive amount with at most two decimal places.
-- Withdrawals cannot make the balance negative.
-- Balance changes use a row lock (`findByIdComBloqueio`).
-- The schema is applied manually with `src/main/resources/db/schema.sql`; Hibernate does not create tables (`ddl-auto=none`).
+{ "valor": 150.00 }
+```
 
-## Running locally
+Erro de negócio:
 
-Requirements: JDK 25, MySQL 8 and Node.js 20+.
+```json
+{
+  "status": 409,
+  "mensagem": "Saldo insuficiente para realizar o saque."
+}
+```
 
-1. Create the database:
+## Estrutura do projeto
 
-   ```powershell
-   Get-Content src\main\resources\db\schema.sql | mysql -u root -p
-   ```
+```text
+src/main/java/com/digitalbanking/api/
+├── controller/ContaController.java
+├── dto/            ContaRequest, ContaResponse, ValorRequest, ErroResponse
+├── entity/Conta.java
+├── handler/GlobalExceptionHandler.java
+├── repository/ContaRepository.java
+└── service/ContaService.java
 
-2. Set the credentials:
+src/main/resources/
+├── static/         index.html, style.css, app.js
+├── db/schema.sql
+└── application.properties
 
-   ```powershell
-   $env:DB_USERNAME = "root"
-   $env:DB_PASSWORD = "your_password"
-   ```
+src/test/java/com/digitalbanking/api/
+├── controller/ContaControllerTest.java
+└── service/ContaServiceTest.java
+```
 
-3. Start the API:
+## Regras de negócio
 
-   ```powershell
-   .\mvnw.cmd spring-boot:run
-   ```
+- O número da conta tem 8 dígitos e é gerado aleatoriamente. O banco impede números duplicados.
+- Depósitos e saques validam valor positivo e com no máximo duas casas decimais.
+- O saque não pode deixar o saldo negativo.
+- Depósitos e saques usam bloqueio de linha (`findByIdComBloqueio`).
+- O banco é criado manualmente com `src/main/resources/db/schema.sql`.
 
-4. Start the front end:
-
-   ```powershell
-   cd frontend
-   npm install
-   npm run dev
-   ```
-
-   The UI runs at `http://localhost:5173` and proxies `/api` to the API.
-
-## Tests
+## Testes
 
 ```powershell
 .\mvnw.cmd test
-cd frontend; npm test
 ```
 
-- `ContaServiceTest` (11 tests): creation, number generation, listing, lookup, balance, deposit, withdrawal and validation.
-- `ContaControllerTest` (12 tests): status codes, `Location` header, validation errors, 404, 405 and business errors.
-- Frontend: 3 tests for the formatting helpers.
+- `ContaServiceTest` (7 testes): criação, listagem, busca, depósito, saque, conta não encontrada e saldo insuficiente.
+- `ContaControllerTest` (8 testes): status HTTP, header `Location`, validação, 404 e 409.
 
-## Limitations
+## Limitações
 
-- No authentication or authorization.
-- No pagination for the account list.
-- No Docker or CI workflow yet.
+- Sem autenticação ou autorização.
+- Sem paginação na listagem.
+- Sem Docker ou CI.
 
-## License
+## Licença
 
-MIT. See [LICENSE](LICENSE).
+MIT. Veja [LICENSE](LICENSE).
 
-**Author:** Emanuel Vitor Fernandes · [GitHub](https://github.com/evfernandes-dev) · [LinkedIn](https://www.linkedin.com/in/emanuel-vitor-fernandes-6a3796421)
+**Autor:** Emanuel Vitor Fernandes · [GitHub](https://github.com/evfernandes-dev) · [LinkedIn](https://www.linkedin.com/in/emanuel-vitor-fernandes-6a3796421)
