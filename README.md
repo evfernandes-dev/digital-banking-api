@@ -1,10 +1,17 @@
 # Digital Banking API
 
-A small REST API to manage bank accounts: create an account, check its balance, deposit and withdraw. Built as a study and portfolio project with **Java 25**, **Spring Boot 4**, **MySQL** and a **React** front end.
+Small REST API to create bank accounts, check balances, deposit and withdraw. Study/portfolio project built with Java 25, Spring Boot 4, MySQL and a React front end.
 
-> **Project status:** study/portfolio project. It does not include authentication, pagination or deployment automation yet.
+> The project has no authentication, pagination or deployment automation yet.
 
----
+## Features
+
+- Create an account with a unique 8-digit number
+- List accounts and fetch one by ID
+- Check the balance
+- Deposit and withdraw with amount validation and no negative balance
+- Consistent JSON error responses
+- Small React front end for manual testing
 
 ## Stack
 
@@ -13,74 +20,33 @@ A small REST API to manage bank accounts: create an account, check its balance, 
 - **Frontend:** React 19, TypeScript, Vite
 - **Tests:** JUnit 5, Mockito, MockMvc, Vitest
 
----
-
-## Features
-
-- Create an account with a unique 8-digit number.
-- List accounts and fetch one by ID.
-- Check the balance.
-- Deposit and withdraw with amount validation and no negative balance.
-- Consistent JSON error responses for validation, business and HTTP errors.
-- Small React front end for manual testing.
-
----
-
 ## Architecture
 
-The backend uses a layered structure:
-
-1. **Controller** (`controller`): HTTP endpoints and `Location` header on creation.
-2. **Service** (`service`): business rules, validation and transaction boundaries.
-3. **Repository** (`repository`): Spring Data JPA access, including a row lock for balance changes.
-4. **DTOs** (`dto`): request and response records.
-5. **Exception handling** (`handler`): a `@RestControllerAdvice` that maps exceptions to JSON errors.
+Controller → Service → Repository, with DTOs and a global exception handler. Balance changes use a repository query with a row lock.
 
 ```text
-digital-banking-api/
-├── src/main/java/com/digitalbanking/api/
-│   ├── controller/       # REST controller
-│   ├── dto/              # Request and response records
-│   ├── entity/           # JPA entity
-│   ├── exception/        # Business exceptions
-│   ├── handler/          # Global exception handler
-│   ├── repository/       # Spring Data JPA repository
-│   └── service/          # Business rules
-├── src/main/resources/
-│   ├── application.properties
-│   └── db/schema.sql     # MySQL schema
-├── src/test/java/        # Service and controller tests
-├── frontend/             # React + TypeScript + Vite app
-├── pom.xml
-└── README.md
+src/main/java/com/digitalbanking/api/
+├── controller/   REST endpoints
+├── dto/          Request and response records
+├── entity/       JPA entity
+├── exception/    Business exceptions
+├── handler/      Global exception handler
+├── repository/   Spring Data JPA repository
+└── service/      Business rules
 ```
-
----
-
-## Business rules
-
-- Account numbers have 8 digits and are generated with retry when a collision occurs.
-- Deposits and withdrawals require a positive amount with at most two decimal places.
-- Withdrawals cannot make the balance negative.
-- Balance changes use a repository query with a row lock (`findByIdComBloqueio`).
-- The database schema is applied manually with `src/main/resources/db/schema.sql`; Hibernate does not create or update tables (`ddl-auto=none`).
-
----
 
 ## API
 
 Base URL: `http://localhost:8081`
 
 | Method | Path | Description |
-|--------|------|-------------|
+| --- | --- | --- |
 | POST | `/contas` | Create an account |
 | GET | `/contas` | List accounts |
 | GET | `/contas/{id}` | Get an account |
 | GET | `/contas/{id}/saldo` | Get the balance |
 | POST | `/contas/{id}/deposito` | Deposit |
 | POST | `/contas/{id}/saque` | Withdraw |
-
-Example:
 
 ```http
 POST /contas
@@ -98,32 +64,15 @@ Content-Type: application/json
 }
 ```
 
-Deposit and withdraw:
+Deposits and withdrawals accept `{ "valor": 150.00 }` and return the updated account with `200 OK`.
 
-```http
-POST /contas/1/deposito
-Content-Type: application/json
+## Business rules
 
-{ "valor": 150.00 }
-```
-
-```http
-POST /contas/1/saque
-Content-Type: application/json
-
-{ "valor": 50.00 }
-```
-
-Both operations return the updated account with `200 OK`. The React front end is optional; the API can also be tested with curl, Postman or Insomnia.
-
-### Validation and errors
-
-- `ContaRequest`: `@NotBlank` and `@Size(max = 120)` for the account holder.
-- `ValorRequest`: `@NotNull`, `@Positive` and `@Digits` for amounts.
-- `GlobalExceptionHandler` returns a JSON body with `timestamp`, `status`, `error`, `message` and `details`.
-- Handled cases include validation errors, malformed JSON, invalid path variables, missing resources, unsupported methods and unexpected errors.
-
----
+- Account numbers have 8 digits and are generated with retry on collision.
+- Deposits and withdrawals require a positive amount with at most two decimal places.
+- Withdrawals cannot make the balance negative.
+- Balance changes use a row lock (`findByIdComBloqueio`).
+- The schema is applied manually with `src/main/resources/db/schema.sql`; Hibernate does not create tables (`ddl-auto=none`).
 
 ## Running locally
 
@@ -135,7 +84,7 @@ Requirements: JDK 25, MySQL 8 and Node.js 20+.
    Get-Content src\main\resources\db\schema.sql | mysql -u root -p
    ```
 
-2. Set the database credentials:
+2. Set the credentials:
 
    ```powershell
    $env:DB_USERNAME = "root"
@@ -158,38 +107,22 @@ Requirements: JDK 25, MySQL 8 and Node.js 20+.
 
    The UI runs at `http://localhost:5173` and proxies `/api` to the API.
 
----
-
 ## Tests
-
-Backend tests:
 
 ```powershell
 .\mvnw.cmd test
+cd frontend; npm test
 ```
 
-- `ContaServiceTest` (11 tests): account creation, unique number generation, listing, lookup, balance, deposit, withdrawal, insufficient balance and invalid amounts.
-- `ContaControllerTest` (12 tests): HTTP status codes, `Location` header, validation errors, 404, 405 and business error responses.
+- `ContaServiceTest` (11 tests): creation, number generation, listing, lookup, balance, deposit, withdrawal and validation.
+- `ContaControllerTest` (12 tests): status codes, `Location` header, validation errors, 404, 405 and business errors.
+- Frontend: 3 tests for the formatting helpers.
 
-Frontend tests:
-
-```powershell
-cd frontend
-npm test
-```
-
-The frontend suite has 3 tests for the formatting helpers.
-
----
-
-## Limitations and next steps
+## Limitations
 
 - No authentication or authorization.
 - No pagination for the account list.
 - No Docker or CI workflow yet.
-- The documentation and screenshots are kept in `docs/screenshots`.
-
----
 
 ## License
 
