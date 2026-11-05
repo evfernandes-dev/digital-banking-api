@@ -1,9 +1,8 @@
 package com.digitalbanking.api.controller;
 
-import com.digitalbanking.api.dto.conta.ContaRequest;
-import com.digitalbanking.api.dto.conta.ContaResponse;
-import com.digitalbanking.api.dto.conta.SaldoResponse;
-import com.digitalbanking.api.dto.operacao.ValorRequest;
+import com.digitalbanking.api.dto.ContaRequest;
+import com.digitalbanking.api.dto.ContaResponse;
+import com.digitalbanking.api.dto.ValorRequest;
 import com.digitalbanking.api.service.ContaService;
 import jakarta.validation.Valid;
 import java.net.URI;
@@ -22,10 +21,8 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 @RequestMapping("/contas")
 public class ContaController {
 
-    // Service com as regras de negócio.
     private final ContaService contaService;
 
-    // Recebe o service pelo construtor.
     public ContaController(ContaService contaService) {
         this.contaService = contaService;
     }
@@ -34,7 +31,6 @@ public class ContaController {
     @PostMapping
     public ResponseEntity<ContaResponse> criar(@Valid @RequestBody ContaRequest request) {
         ContaResponse response = contaService.criar(request);
-        // Monta a URL da conta criada para o header Location.
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}")
                 .buildAndExpand(response.id())
@@ -52,12 +48,6 @@ public class ContaController {
     @GetMapping("/{id}")
     public ResponseEntity<ContaResponse> buscarPorId(@PathVariable Long id) {
         return ResponseEntity.ok(contaService.buscarPorId(id));
-    }
-
-    // Consulta somente o saldo da conta.
-    @GetMapping("/{id}/saldo")
-    public ResponseEntity<SaldoResponse> consultarSaldo(@PathVariable Long id) {
-        return ResponseEntity.ok(contaService.consultarSaldo(id));
     }
 
     // Deposita um valor na conta.

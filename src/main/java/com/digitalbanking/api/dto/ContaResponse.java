@@ -1,4 +1,4 @@
-package com.digitalbanking.api.dto.conta;
+package com.digitalbanking.api.dto;
 
 import com.digitalbanking.api.entity.Conta;
 import java.math.BigDecimal;

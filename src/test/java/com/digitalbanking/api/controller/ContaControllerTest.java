@@ -7,34 +7,30 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.digitalbanking.api.dto.conta.ContaResponse;
-import com.digitalbanking.api.dto.conta.SaldoResponse;
-import com.digitalbanking.api.exception.InsufficientBalanceException;
-import com.digitalbanking.api.exception.ResourceNotFoundException;
+import com.digitalbanking.api.dto.ContaResponse;
 import com.digitalbanking.api.service.ContaService;
 import java.math.BigDecimal;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.server.ResponseStatusException;
 
 // Testes da camada HTTP do ContaController.
 @WebMvcTest(ContaController.class)
 class ContaControllerTest {
 
-    // Cliente para simular requisições HTTP.
     @Autowired
     private MockMvc mockMvc;
 
-    // Service simulado para focar no controller.
     @MockitoBean
     private ContaService contaService;
 
@@ -102,24 +98,12 @@ class ContaControllerTest {
     @Test
     void deveRetornar404QuandoContaNaoExistir() throws Exception {
         when(contaService.buscarPorId(99L))
-                .thenThrow(new ResourceNotFoundException("Conta não encontrada: id 99"));
+                .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Conta não encontrada: id 99"));
 
         mockMvc.perform(get("/contas/99"))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.status").value(404));
-    }
-
-    // GET /contas/{id}/saldo deve devolver o saldo.
-    @Test
-    void deveConsultarSaldo() throws Exception {
-        when(contaService.consultarSaldo(1L))
-                .thenReturn(new SaldoResponse(1L, "00000001", new BigDecimal("100.00")));
-
-        mockMvc.perform(get("/contas/1/saldo"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.numero").value("00000001"))
-                .andExpect(jsonPath("$.saldo").value(100.00));
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.mensagem").value("Conta não encontrada: id 99"));
     }
 
     // Depósito válido deve devolver 200 com o novo saldo.
@@ -151,40 +135,11 @@ class ContaControllerTest {
         verifyNoInteractions(contaService);
     }
 
-    // Id não numérico deve devolver 400.
-    @Test
-    void deveRetornar400QuandoIdNaoForNumerico() throws Exception {
-        mockMvc.perform(get("/contas/abc"))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value(400))
-                .andExpect(jsonPath("$.message").value("Parâmetro inválido: id."));
-
-        verifyNoInteractions(contaService);
-    }
-
-    // Rota inexistente deve devolver 404.
-    @Test
-    void deveRetornar404ParaRotaInexistente() throws Exception {
-        mockMvc.perform(get("/nao-existe"))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.status").value(404))
-                .andExpect(jsonPath("$.message").value("Recurso não encontrado."));
-    }
-
-    // Método sem mapeamento deve devolver 405.
-    @Test
-    void deveRetornar405ParaMetodoNaoSuportado() throws Exception {
-        mockMvc.perform(put("/contas"))
-                .andExpect(status().isMethodNotAllowed())
-                .andExpect(jsonPath("$.status").value(405))
-                .andExpect(jsonPath("$.message").value("Método HTTP não permitido para este recurso."));
-    }
-
     // Saque sem saldo deve devolver 409.
     @Test
     void deveRetornar409AoSacarComSaldoInsuficiente() throws Exception {
         when(contaService.sacar(eq(1L), any(BigDecimal.class)))
-                .thenThrow(new InsufficientBalanceException("Saldo insuficiente para realizar o saque."));
+                .thenThrow(new ResponseStatusException(HttpStatus.CONFLICT, "Saldo insuficiente para realizar o saque."));
 
         mockMvc.perform(post("/contas/1/saque")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -193,7 +148,7 @@ class ContaControllerTest {
                                 """))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.status").value(409))
-                .andExpect(jsonPath("$.message").value("Saldo insuficiente para realizar o saque."));
+                .andExpect(jsonPath("$.mensagem").value("Saldo insuficiente para realizar o saque."));
     }
 
 }

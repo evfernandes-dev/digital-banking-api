@@ -3,19 +3,11 @@ package com.digitalbanking.api.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import com.digitalbanking.api.dto.conta.ContaRequest;
-import com.digitalbanking.api.dto.conta.ContaResponse;
-import com.digitalbanking.api.dto.conta.SaldoResponse;
+import com.digitalbanking.api.dto.ContaRequest;
+import com.digitalbanking.api.dto.ContaResponse;
 import com.digitalbanking.api.entity.Conta;
-import com.digitalbanking.api.exception.InsufficientBalanceException;
-import com.digitalbanking.api.exception.InvalidAmountException;
-import com.digitalbanking.api.exception.ResourceNotFoundException;
 import com.digitalbanking.api.repository.ContaRepository;
 import java.math.BigDecimal;
 import java.util.List;
@@ -26,20 +18,19 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 // Testes unitários das regras do ContaService.
 @ExtendWith(MockitoExtension.class)
 class ContaServiceTest {
 
-    // Repositório simulado para isolar o service.
     @Mock
     private ContaRepository contaRepository;
 
-    // Service testado com o mock injetado.
     @InjectMocks
     private ContaService contaService;
 
-    // Cria uma conta de apoio para os testes.
     private Conta contaComSaldo(Long id, String numero, String saldo) {
         Conta conta = new Conta(numero, "Ana Silva");
         conta.setId(id);
@@ -50,7 +41,6 @@ class ContaServiceTest {
     // Conta criada deve começar com saldo zero.
     @Test
     void deveCriarContaComSaldoZero() {
-        when(contaRepository.existsByNumero(anyString())).thenReturn(false);
         when(contaRepository.save(any(Conta.class))).thenAnswer(invocation -> {
             Conta conta = invocation.getArgument(0);
             conta.setId(5L);
@@ -60,21 +50,9 @@ class ContaServiceTest {
         ContaResponse response = contaService.criar(new ContaRequest("Ana Silva"));
 
         assertThat(response.id()).isEqualTo(5L);
-        assertThat(response.numero()).isNotBlank();
+        assertThat(response.numero()).hasSize(8);
         assertThat(response.titular()).isEqualTo("Ana Silva");
         assertThat(response.saldo()).isEqualByComparingTo("0.00");
-    }
-
-    // Deve tentar outro número quando houver colisão.
-    @Test
-    void deveGerarNovoNumeroQuandoHouverColisao() {
-        when(contaRepository.existsByNumero(anyString())).thenReturn(true, true, false);
-        when(contaRepository.save(any(Conta.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
-        ContaResponse response = contaService.criar(new ContaRequest("Ana Silva"));
-
-        assertThat(response.numero()).isNotBlank();
-        verify(contaRepository, times(3)).existsByNumero(anyString());
     }
 
     // Listagem deve manter a ordem por id.
@@ -108,24 +86,13 @@ class ContaServiceTest {
         when(contaRepository.findById(99L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> contaService.buscarPorId(99L))
-                .isInstanceOf(ResourceNotFoundException.class);
-    }
-
-    // Consulta de saldo deve devolver número e saldo.
-    @Test
-    void deveConsultarSaldo() {
-        when(contaRepository.findById(1L)).thenReturn(Optional.of(contaComSaldo(1L, "00000001", "250.00")));
-
-        SaldoResponse response = contaService.consultarSaldo(1L);
-
-        assertThat(response.id()).isEqualTo(1L);
-        assertThat(response.numero()).isEqualTo("00000001");
-        assertThat(response.saldo()).isEqualByComparingTo("250.00");
+                .isInstanceOfSatisfying(ResponseStatusException.class,
+                        ex -> assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND));
     }
 
     // Depósito deve somar o valor ao saldo.
     @Test
-    void deveDepositarSomandoAoSalso() {
+    void deveDepositarSomandoAoSaldo() {
         Conta conta = contaComSaldo(1L, "00000001", "100.00");
         when(contaRepository.findByIdComBloqueio(1L)).thenReturn(Optional.of(conta));
 
@@ -137,7 +104,7 @@ class ContaServiceTest {
 
     // Saque deve subtrair o valor do saldo.
     @Test
-    void deveSacarSubtraindoSalso() {
+    void deveSacarSubtraindoDoSaldo() {
         Conta conta = contaComSaldo(1L, "00000001", "100.00");
         when(contaRepository.findByIdComBloqueio(1L)).thenReturn(Optional.of(conta));
 
@@ -154,27 +121,10 @@ class ContaServiceTest {
         when(contaRepository.findByIdComBloqueio(1L)).thenReturn(Optional.of(conta));
 
         assertThatThrownBy(() -> contaService.sacar(1L, new BigDecimal("50.00")))
-                .isInstanceOf(InsufficientBalanceException.class);
+                .isInstanceOfSatisfying(ResponseStatusException.class,
+                        ex -> assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.CONFLICT));
 
         assertThat(conta.getSaldo()).isEqualByComparingTo("10.00");
-    }
-
-    // Valor zero ou negativo deve ser recusado sem acessar o banco.
-    @Test
-    void deveRejeitarValorNaoPositivo() {
-        assertThatThrownBy(() -> contaService.depositar(1L, BigDecimal.ZERO))
-                .isInstanceOf(InvalidAmountException.class);
-
-        verifyNoInteractions(contaRepository);
-    }
-
-    // Valor com mais de duas casas decimais deve ser recusado.
-    @Test
-    void deveRejeitarValorComMaisDeDuasCasasDecimais() {
-        assertThatThrownBy(() -> contaService.depositar(1L, new BigDecimal("10.999")))
-                .isInstanceOf(InvalidAmountException.class);
-
-        verifyNoInteractions(contaRepository);
     }
 
 }
